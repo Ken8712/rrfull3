@@ -9,6 +9,10 @@ class User < ApplicationRecord
   # =====================================
   belongs_to :pair_user, class_name: 'User', optional: true
   has_one :paired_with, class_name: 'User', foreign_key: :pair_user_id
+  
+  # セッション関連
+  has_many :sessions_as_user1, class_name: 'Session', foreign_key: :user1_id, dependent: :destroy
+  has_many :sessions_as_user2, class_name: 'Session', foreign_key: :user2_id, dependent: :destroy
 
   # =====================================
   # バリデーション
@@ -55,6 +59,28 @@ class User < ApplicationRecord
     true
   rescue ActiveRecord::RecordInvalid
     false
+  end
+  
+  # 自分が参加しているセッションを取得
+  # @return [ActiveRecord::Relation] 参加しているセッション
+  def sessions
+    Session.for_user(self)
+  end
+  
+  # パートナーとの新しいセッションを作成
+  # @param [String] title セッションタイトル
+  # @return [Session, nil] 作成されたセッション、失敗した場合はnil
+  def create_session_with_partner(title)
+    return nil unless paired?
+    
+    partner_user = partner
+    Session.create(
+      title: title,
+      user1: self,
+      user2: partner_user
+    )
+  rescue ActiveRecord::RecordInvalid
+    nil
   end
 
   private

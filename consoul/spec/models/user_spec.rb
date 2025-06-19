@@ -172,4 +172,64 @@ RSpec.describe User, type: :model do
       expect(user1.errors[:pair_user]).to include("自分自身をペアに設定することはできません")
     end
   end
+
+  describe 'セッション関連' do
+    let(:user1) { User.create!(email: 'user1@example.com', password: 'password123') }
+    let(:user2) { User.create!(email: 'user2@example.com', password: 'password123') }
+
+    before do
+      user1.create_mutual_pair_with(user2)
+    end
+
+    describe '#sessions' do
+      let!(:session1) do
+        Session.create!(
+          title: 'セッション1',
+          user1: user1,
+          user2: user2
+        )
+      end
+
+      let!(:session2) do
+        Session.create!(
+          title: 'セッション2',
+          user1: user2,
+          user2: user1
+        )
+      end
+
+      it '自分が参加しているセッションを返すこと' do
+        sessions = user1.sessions
+        expect(sessions).to include(session1, session2)
+      end
+    end
+
+    describe '#create_session_with_partner' do
+      it 'パートナーとのセッションを作成できること' do
+        session = user1.create_session_with_partner('新しいセッション')
+        expect(session).to be_persisted
+        expect(session.title).to eq '新しいセッション'
+        expect(session.user1).to eq user1
+        expect(session.user2).to eq user2
+      end
+
+      it 'ペアがいない場合はnilを返すこと' do
+        user3 = User.create!(email: 'user3@example.com', password: 'password123')
+        session = user3.create_session_with_partner('失敗セッション')
+        expect(session).to be_nil
+      end
+    end
+
+    describe 'アソシエーション' do
+      it 'sessions_as_user1を持つこと' do
+        expect(user1).to respond_to(:sessions_as_user1)
+        expect(user1.class.reflect_on_association(:sessions_as_user1).macro).to eq :has_many
+      end
+
+      it 'sessions_as_user2を持つこと' do
+        expect(user1).to respond_to(:sessions_as_user2)
+        expect(user1.class.reflect_on_association(:sessions_as_user2).macro).to eq :has_many
+      end
+    end
+  end
 end
