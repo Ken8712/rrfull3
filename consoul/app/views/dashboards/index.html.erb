@@ -4,6 +4,6 @@
   <p>ようこそ、<%= current_user.name %>さん</p>
   
   <div class="actions">
-    <p>Room機能は今後実装予定です</p>
+    <%= link_to 'ルーム一覧', rooms_path, class: 'btn btn-primary' %>
   </div>
 </div>

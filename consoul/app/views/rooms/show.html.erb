@@ -1,0 +1,107 @@
+<div class="container">
+  <h1><%= @room.title %></h1>
+  
+  <div class="room-info mb-4">
+    <p>ステータス: <span class="badge badge-<%= @room.status %>"><%= @room.status %></span></p>
+    <p>パートナー: <%= @partner.name %>さん</p>
+    <% if @room.started_at %>
+      <p>開始時刻: <%= @room.started_at.strftime('%H:%M') %></p>
+    <% end %>
+  </div>
+  
+  <% if @room.status == 'waiting' %>
+    <div class="waiting-section">
+      <h3>ルーム開始前</h3>
+      <p>パートナーが参加するのを待っています...</p>
+      <button class="btn btn-success btn-lg" onclick="startRoom()">ルームを開始</button>
+    </div>
+  <% elsif @room.status == 'active' %>
+    <div class="active-section">
+      <div class="timer-section text-center mb-4">
+        <h2>経過時間</h2>
+        <div class="timer-display">
+          <span id="timer" class="display-4"><%= @room.elapsed_time_formatted %></span>
+        </div>
+        <div class="timer-controls mt-3">
+          <% if @room.timer_running? %>
+            <button class="btn btn-warning" onclick="pauseTimer()">一時停止</button>
+          <% else %>
+            <button class="btn btn-success" onclick="resumeTimer()">再開</button>
+          <% end %>
+          <button class="btn btn-danger" onclick="completeRoom()">ルーム終了</button>
+        </div>
+      </div>
+      
+      <div class="heart-section text-center mb-4">
+        <h3>ハートカウンター</h3>
+        <div class="heart-display">
+          <span id="heart-count" class="display-3"><%= @room.heart_count %></span>
+          <span class="heart-icon">❤️</span>
+        </div>
+        <button class="btn btn-pink btn-lg" onclick="addHeart()">ハートを送る</button>
+      </div>
+      
+      <div class="activity-section">
+        <button class="btn btn-info" onclick="updateActivity()">アクティビティ更新</button>
+        <p class="text-muted">最終アクティビティ: 
+          <span id="last-activity">
+            <%= @room.last_activity_at ? @room.last_activity_at.strftime('%H:%M:%S') : 'なし' %>
+          </span>
+        </p>
+      </div>
+    </div>
+  <% elsif @room.status == 'completed' %>
+    <div class="completed-section">
+      <h3>ルーム完了</h3>
+      <p>総経過時間: <%= @room.elapsed_time_formatted %></p>
+      <p>総ハート数: <%= @room.heart_count %></p>
+      <% if @room.ended_at %>
+        <p>終了時刻: <%= @room.ended_at.strftime('%Y/%m/%d %H:%M') %></p>
+      <% end %>
+    </div>
+  <% end %>
+  
+  <div class="navigation mt-4">
+    <%= link_to 'ルーム一覧に戻る', rooms_path, class: 'btn btn-outline-primary' %>
+    <% if @room.status == 'waiting' %>
+      <%= link_to '編集', edit_room_path(@room), class: 'btn btn-secondary' %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+// 基本的なJavaScript関数（今後Stimulusに移行予定）
+function startRoom() {
+  if(confirm('ルームを開始しますか？')) {
+    // Ajax実装予定
+    alert('ルーム開始機能は今後実装予定です');
+  }
+}
+
+function pauseTimer() {
+  // Ajax実装予定
+  alert('タイマー一時停止機能は今後実装予定です');
+}
+
+function resumeTimer() {
+  // Ajax実装予定
+  alert('タイマー再開機能は今後実装予定です');
+}
+
+function completeRoom() {
+  if(confirm('ルームを終了しますか？')) {
+    // Ajax実装予定
+    alert('ルーム終了機能は今後実装予定です');
+  }
+}
+
+function addHeart() {
+  // Ajax実装予定
+  alert('ハート送信機能は今後実装予定です');
+}
+
+function updateActivity() {
+  // Ajax実装予定
+  alert('アクティビティ更新機能は今後実装予定です');
+}
+</script>

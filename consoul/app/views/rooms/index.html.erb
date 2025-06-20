@@ -1,0 +1,48 @@
+<div class="container">
+  <h1>ルーム一覧</h1>
+  
+  <div class="actions mb-4">
+    <% if current_user.paired? %>
+      <%= link_to '新しいルームを作成', new_room_path, class: 'btn btn-primary' %>
+    <% else %>
+      <p class="text-warning">ルームを作成するにはペアが必要です</p>
+    <% end %>
+  </div>
+  
+  <% if @rooms.any? %>
+    <div class="room-list">
+      <% @rooms.each do |room| %>
+        <div class="room-card border rounded p-3 mb-3">
+          <h3><%= room.title %></h3>
+          <p>ステータス: <%= room.status %></p>
+          <p>作成日時: <%= room.created_at.strftime('%Y/%m/%d %H:%M') %></p>
+          <% if room.started_at %>
+            <p>開始時刻: <%= room.started_at.strftime('%H:%M') %></p>
+          <% end %>
+          <% if room.status == 'active' %>
+            <p>経過時間: <%= room.elapsed_time_formatted %></p>
+            <p>ハート数: <%= room.heart_count %></p>
+          <% end %>
+          
+          <div class="room-actions">
+            <%= link_to 'ルームに参加', room_path(room), class: 'btn btn-success' %>
+            <% if room.status == 'waiting' %>
+              <%= link_to '編集', edit_room_path(room), class: 'btn btn-secondary' %>
+              <%= link_to '削除', room_path(room), method: :delete, 
+                          confirm: '本当に削除しますか？', class: 'btn btn-danger' %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p>まだルームがありません。</p>
+    <% if current_user.paired? %>
+      <p>最初のルームを作成してみましょう！</p>
+    <% end %>
+  <% end %>
+  
+  <div class="navigation mt-4">
+    <%= link_to 'ダッシュボードに戻る', root_path, class: 'btn btn-outline-primary' %>
+  </div>
+</div>
