@@ -13,6 +13,7 @@ class User < ApplicationRecord
   # =====================================
   # バリデーション
   # =====================================
+  validates :name, presence: true, length: { maximum: 50 }
   validate :cannot_pair_with_self
 
   # =====================================

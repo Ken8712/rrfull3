@@ -30,15 +30,15 @@ RSpec.describe User, type: :model do
       expect(user.errors[:password]).to include("can't be blank")
     end
 
-    it '有効なメールアドレスとパスワードで作成できること' do
-      user = User.new(email: 'test@example.com', password: 'password123')
+    it '有効なメールアドレス、名前、パスワードで作成できること' do
+      user = User.new(email: 'test@example.com', name: 'Test User', password: 'password123')
       expect(user).to be_valid
     end
   end
 
   describe '#paired?' do
-    let(:user1) { User.create!(email: 'user1@example.com', password: 'password123') }
-    let(:user2) { User.create!(email: 'user2@example.com', password: 'password123') }
+    let(:user1) { User.create!(email: 'user1@example.com', name: 'User1', password: 'password123') }
+    let(:user2) { User.create!(email: 'user2@example.com', name: 'User2', password: 'password123') }
 
     context 'ペアがいない場合' do
       it 'falseを返すこと' do
@@ -64,9 +64,9 @@ RSpec.describe User, type: :model do
   end
 
   describe '#partner' do
-    let(:user1) { User.create!(email: 'user1@example.com', password: 'password123') }
-    let(:user2) { User.create!(email: 'user2@example.com', password: 'password123') }
-    let(:user3) { User.create!(email: 'user3@example.com', password: 'password123') }
+    let(:user1) { User.create!(email: 'user1@example.com', name: 'User1', password: 'password123') }
+    let(:user2) { User.create!(email: 'user2@example.com', name: 'User2', password: 'password123') }
+    let(:user3) { User.create!(email: 'user3@example.com', name: 'User3', password: 'password123') }
 
     context 'ペアがいない場合' do
       it 'nilを返すこと' do
@@ -92,8 +92,8 @@ RSpec.describe User, type: :model do
   end
 
   describe '#unpair!' do
-    let(:user1) { User.create!(email: 'user1@example.com', password: 'password123') }
-    let(:user2) { User.create!(email: 'user2@example.com', password: 'password123') }
+    let(:user1) { User.create!(email: 'user1@example.com', name: 'User1', password: 'password123') }
+    let(:user2) { User.create!(email: 'user2@example.com', name: 'User2', password: 'password123') }
 
     context 'pair_userが設定されている場合' do
       before do
@@ -119,9 +119,9 @@ RSpec.describe User, type: :model do
   end
 
   describe '#create_mutual_pair_with' do
-    let(:user1) { User.create!(email: 'user1@example.com', password: 'password123') }
-    let(:user2) { User.create!(email: 'user2@example.com', password: 'password123') }
-    let(:user3) { User.create!(email: 'user3@example.com', password: 'password123') }
+    let(:user1) { User.create!(email: 'user1@example.com', name: 'User1', password: 'password123') }
+    let(:user2) { User.create!(email: 'user2@example.com', name: 'User2', password: 'password123') }
+    let(:user3) { User.create!(email: 'user3@example.com', name: 'User3', password: 'password123') }
 
     it '相互ペアを作成できること' do
       result = user1.create_mutual_pair_with(user2)
@@ -154,9 +154,9 @@ RSpec.describe User, type: :model do
   end
 
   describe 'ペアシステムの整合性' do
-    let(:user1) { User.create!(email: 'user1@example.com', password: 'password123') }
-    let(:user2) { User.create!(email: 'user2@example.com', password: 'password123') }
-    let(:user3) { User.create!(email: 'user3@example.com', password: 'password123') }
+    let(:user1) { User.create!(email: 'user1@example.com', name: 'User1', password: 'password123') }
+    let(:user2) { User.create!(email: 'user2@example.com', name: 'User2', password: 'password123') }
+    let(:user3) { User.create!(email: 'user3@example.com', name: 'User3', password: 'password123') }
 
     it '相互にペアを作成できること' do
       user1.update!(pair_user: user2)
