@@ -5,7 +5,18 @@ Rails.application.routes.draw do
   root 'dashboards#index'
   
   # ルーム関連
-  resources :rooms
+  resources :rooms do
+    member do
+      patch :start
+      patch :pause_timer
+      patch :resume_timer
+      patch :complete
+      patch :add_heart
+      patch :update_activity
+      patch :set_emotion
+      get :status
+    end
+  end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

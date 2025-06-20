@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_06_20_075635) do
+ActiveRecord::Schema[7.2].define(version: 2025_06_20_094340) do
   create_table "rooms", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "title", null: false
     t.string "status", default: "waiting", null: false
@@ -25,11 +25,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_20_075635) do
     t.datetime "last_activity_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "user1_emotion"
+    t.string "user2_emotion"
     t.index ["created_at"], name: "index_rooms_on_created_at"
     t.index ["last_activity_at"], name: "index_rooms_on_last_activity_at"
     t.index ["status"], name: "index_rooms_on_status"
+    t.index ["user1_emotion"], name: "index_rooms_on_user1_emotion"
     t.index ["user1_id", "user2_id"], name: "index_rooms_on_user1_id_and_user2_id"
     t.index ["user1_id"], name: "index_rooms_on_user1_id"
+    t.index ["user2_emotion"], name: "index_rooms_on_user2_emotion"
     t.index ["user2_id"], name: "index_rooms_on_user2_id"
   end
 

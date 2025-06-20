@@ -12,6 +12,8 @@ class Room < ApplicationRecord
   validates :status, inclusion: { in: %w[waiting active paused completed] }
   validates :timer_seconds, numericality: { greater_than_or_equal_to: 0 }
   validates :heart_count, numericality: { greater_than_or_equal_to: 0 }
+  validates :user1_emotion, inclusion: { in: %w[😊 😢 😠 😴 🤔], allow_nil: true }
+  validates :user2_emotion, inclusion: { in: %w[😊 😢 😠 😴 🤔], allow_nil: true }
   validate :users_must_be_different
   validate :users_must_be_paired
 
@@ -134,6 +136,38 @@ class Room < ApplicationRecord
   # ユーザーアクティビティを記録
   def update_activity!
     touch(:last_activity_at)
+  end
+
+  # ユーザーの感情を設定
+  def set_emotion_for_user(user, emotion)
+    return false unless participant?(user)
+    return false unless %w[😊 😢 😠 😴 🤔].include?(emotion)
+
+    if user1 == user
+      update!(user1_emotion: emotion, last_activity_at: Time.current)
+    elsif user2 == user
+      update!(user2_emotion: emotion, last_activity_at: Time.current)
+    else
+      false
+    end
+  end
+
+  # ユーザーの感情を取得
+  def emotion_for_user(user)
+    return user1_emotion if user1 == user
+    return user2_emotion if user2 == user
+    nil
+  end
+
+  # 利用可能な感情リスト
+  def self.available_emotions
+    {
+      '😊' => '嬉しい',
+      '😢' => '悲しい', 
+      '😠' => '怒っている',
+      '😴' => '眠い',
+      '🤔' => '考え中'
+    }
   end
 
   # ルームが非アクティブ（3分間活動なし）かどうか

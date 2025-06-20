@@ -1,8 +1,11 @@
-<div class="container">
+<div class="container" 
+     data-controller="room" 
+     data-room-room-id-value="<%= @room.id %>"
+     data-room-polling-interval-value="500">
   <h1><%= @room.title %></h1>
   
   <div class="room-info mb-4">
-    <p>ステータス: <span class="badge badge-<%= @room.status %>"><%= @room.status %></span></p>
+    <p>ステータス: <span class="badge badge-<%= @room.status %>" data-room-target="status"><%= @room.status %></span></p>
     <p>パートナー: <%= @partner.name %>さん</p>
     <% if @room.started_at %>
       <p>開始時刻: <%= @room.started_at.strftime('%H:%M') %></p>
@@ -13,38 +16,75 @@
     <div class="waiting-section">
       <h3>ルーム開始前</h3>
       <p>パートナーが参加するのを待っています...</p>
-      <button class="btn btn-success btn-lg" onclick="startRoom()">ルームを開始</button>
+      <button class="btn btn-success btn-lg" 
+              data-action="click->room#startRoom">ルームを開始</button>
     </div>
   <% elsif @room.status == 'active' %>
     <div class="active-section">
       <div class="timer-section text-center mb-4">
         <h2>経過時間</h2>
         <div class="timer-display">
-          <span id="timer" class="display-4"><%= @room.elapsed_time_formatted %></span>
+          <span data-room-target="timer" class="display-4"><%= @room.elapsed_time_formatted %></span>
         </div>
         <div class="timer-controls mt-3">
           <% if @room.timer_running? %>
-            <button class="btn btn-warning" onclick="pauseTimer()">一時停止</button>
+            <button class="btn btn-warning" 
+                    data-action="click->room#pauseTimer">一時停止</button>
           <% else %>
-            <button class="btn btn-success" onclick="resumeTimer()">再開</button>
+            <button class="btn btn-success" 
+                    data-action="click->room#resumeTimer">再開</button>
           <% end %>
-          <button class="btn btn-danger" onclick="completeRoom()">ルーム終了</button>
+          <button class="btn btn-danger" 
+                  data-action="click->room#completeRoom">ルーム終了</button>
         </div>
       </div>
       
       <div class="heart-section text-center mb-4">
         <h3>ハートカウンター</h3>
         <div class="heart-display">
-          <span id="heart-count" class="display-3"><%= @room.heart_count %></span>
+          <span data-room-target="heartCount" class="display-3"><%= @room.heart_count %></span>
           <span class="heart-icon">❤️</span>
         </div>
-        <button class="btn btn-pink btn-lg" onclick="addHeart()">ハートを送る</button>
+        <button class="btn btn-pink btn-lg" 
+                data-action="click->room#addHeart">ハートを送る</button>
+      </div>
+      
+      <div class="emotion-section text-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 mb-3">感情を共有</h3>
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="bg-blue-50 rounded-lg p-4">
+            <p class="text-sm text-gray-600 mb-2">あなたの感情</p>
+            <div class="text-2xl mb-2" data-room-target="currentUserEmotion">
+              <%= @room.emotion_for_user(current_user) || '😐' %>
+            </div>
+          </div>
+          
+          <div class="bg-green-50 rounded-lg p-4">
+            <p class="text-sm text-gray-600 mb-2"><%= @partner.name %>さんの感情</p>
+            <div class="text-2xl mb-2" data-room-target="partnerEmotion">
+              <%= @room.emotion_for_user(@partner) || '😐' %>
+            </div>
+          </div>
+        </div>
+        
+        <div class="emotion-buttons flex justify-center space-x-2 flex-wrap">
+          <% Room.available_emotions.each do |emotion, description| %>
+            <button class="emotion-btn p-2 text-2xl hover:bg-gray-100 rounded-lg transition-colors"
+                    data-action="click->room#setEmotion"
+                    data-emotion="<%= emotion %>"
+                    title="<%= description %>">
+              <%= emotion %>
+            </button>
+          <% end %>
+        </div>
       </div>
       
       <div class="activity-section">
-        <button class="btn btn-info" onclick="updateActivity()">アクティビティ更新</button>
-        <p class="text-muted">最終アクティビティ: 
-          <span id="last-activity">
+        <button class="btn btn-info text-sm px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+                data-action="click->room#updateActivity">アクティビティ更新</button>
+        <p class="text-sm text-gray-500 mt-2">最終アクティビティ: 
+          <span data-room-target="lastActivity">
             <%= @room.last_activity_at ? @room.last_activity_at.strftime('%H:%M:%S') : 'なし' %>
           </span>
         </p>
@@ -69,39 +109,3 @@
   </div>
 </div>
 
-<script>
-// 基本的なJavaScript関数（今後Stimulusに移行予定）
-function startRoom() {
-  if(confirm('ルームを開始しますか？')) {
-    // Ajax実装予定
-    alert('ルーム開始機能は今後実装予定です');
-  }
-}
-
-function pauseTimer() {
-  // Ajax実装予定
-  alert('タイマー一時停止機能は今後実装予定です');
-}
-
-function resumeTimer() {
-  // Ajax実装予定
-  alert('タイマー再開機能は今後実装予定です');
-}
-
-function completeRoom() {
-  if(confirm('ルームを終了しますか？')) {
-    // Ajax実装予定
-    alert('ルーム終了機能は今後実装予定です');
-  }
-}
-
-function addHeart() {
-  // Ajax実装予定
-  alert('ハート送信機能は今後実装予定です');
-}
-
-function updateActivity() {
-  // Ajax実装予定
-  alert('アクティビティ更新機能は今後実装予定です');
-}
-</script>
