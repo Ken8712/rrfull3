@@ -90,7 +90,7 @@ class RoomsController < ApplicationController
 
   def set_emotion
     emotion = params[:emotion]
-    
+
     if @room.set_emotion_for_user(current_user, emotion)
       render json: { success: true, room: room_status_data }
     else
