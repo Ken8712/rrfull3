@@ -1,0 +1,155 @@
+<div class="container" 
+     data-controller="room" 
+     data-room-room-id-value="<%= @room.id %>"
+     data-room-polling-interval-value="500">
+  <h1><%= @room.title %></h1>
+  
+  <div class="room-info mb-4">
+    <p>ステータス: <span class="badge badge-<%= @room.status %>" data-room-target="status"><%= @room.status %></span></p>
+    <p>パートナー: <%= @partner.name %>さん</p>
+    <% if @room.started_at %>
+      <p>開始時刻: <%= @room.started_at.strftime('%H:%M') %></p>
+    <% end %>
+  </div>
+  
+  <% if @room.status == 'waiting' %>
+    <div class="waiting-section">
+      <h3>ルーム開始前</h3>
+      <p>パートナーが参加するのを待っています...</p>
+      <button class="px-6 py-3 bg-green-500 text-white text-lg rounded hover:bg-green-600 transition-colors" 
+              data-action="click->room#startRoom">ルームを開始</button>
+    </div>
+  <% end %>
+  
+  <div class="active-section" style="<%= @room.status == 'active' ? 'display: block;' : 'display: none;' %>">
+      <div class="timer-section text-center mb-4">
+        <h2 class="text-xl font-semibold mb-2">経過時間</h2>
+        <div class="timer-display">
+          <span data-room-target="timer" class="text-5xl font-bold"><%= @room.elapsed_time_formatted %></span>
+        </div>
+        <div class="timer-controls mt-3 space-x-4">
+          <% if @room.timer_running? %>
+            <button class="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 active:bg-yellow-700 transition-colors touch-manipulation" 
+                    data-action="click->room#pauseTimer">一時停止</button>
+          <% else %>
+            <button class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors touch-manipulation" 
+                    data-action="click->room#resumeTimer">再開</button>
+          <% end %>
+          <button class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 active:bg-red-700 transition-colors touch-manipulation" 
+                  data-action="click->room#completeRoom">ルーム終了</button>
+        </div>
+      </div>
+      
+      <div class="heart-section text-center mb-4">
+        <h3 class="text-xl font-semibold mb-2">ハートカウンター</h3>
+        <div class="heart-display mb-3">
+          <span data-room-target="heartCount" class="text-4xl font-bold"><%= @room.heart_count %></span>
+          <span class="text-4xl ml-2">❤️</span>
+        </div>
+        <button class="px-8 py-4 bg-pink-500 text-white text-lg rounded-lg hover:bg-pink-600 active:bg-pink-700 transition-colors touch-manipulation" 
+                data-action="click->room#addHeart">ハートを送る</button>
+      </div>
+      
+      <div class="emotion-section text-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 mb-3">感情を共有</h3>
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="bg-blue-50 rounded-lg p-4">
+            <p class="text-sm text-gray-600 mb-2">あなたの感情</p>
+            <div class="text-2xl mb-2" data-room-target="currentUserEmotion">
+              <%= @room.emotion_for_user(current_user) || '😐' %>
+            </div>
+          </div>
+          
+          <div class="bg-green-50 rounded-lg p-4">
+            <p class="text-sm text-gray-600 mb-2"><%= @partner.name %>さんの感情</p>
+            <div class="text-2xl mb-2" data-room-target="partnerEmotion">
+              <%= @room.emotion_for_user(@partner) || '😐' %>
+            </div>
+          </div>
+        </div>
+        
+        <div class="emotion-buttons flex justify-center gap-3 flex-wrap">
+          <% Room.available_emotions.each do |emotion, description| %>
+            <button class="emotion-btn p-4 text-3xl hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors min-w-[60px] min-h-[60px] touch-manipulation"
+                    data-action="click->room#setEmotion"
+                    data-emotion="<%= emotion %>"
+                    title="<%= description %>">
+              <%= emotion %>
+            </button>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="activity-section">
+        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" 
+                data-action="click->room#updateActivity">アクティビティ更新</button>
+        <p class="text-sm text-gray-500 mt-2">最終アクティビティ: 
+          <span data-room-target="lastActivity">
+            <%= @room.last_activity_at ? @room.last_activity_at.strftime('%H:%M:%S') : 'なし' %>
+          </span>
+        </p>
+      </div>
+  </div>
+  
+  <div class="completed-section" style="<%= @room.status == 'completed' ? 'display: block;' : 'display: none;' %>">
+    <div class="bg-white rounded-lg shadow p-8 text-center">
+      <div class="mb-6">
+        <div class="text-6xl mb-4">🎉</div>
+        <h3 class="text-3xl font-bold text-gray-900 mb-2">ルーム完了</h3>
+        <p class="text-gray-600">お疲れ様でした！</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-blue-50 rounded-lg p-4">
+          <div class="text-2xl font-bold text-blue-600" data-completed="elapsed-time">
+            <%= @room.elapsed_time_formatted %>
+          </div>
+          <div class="text-sm text-gray-600">総経過時間</div>
+        </div>
+        
+        <div class="bg-pink-50 rounded-lg p-4">
+          <div class="text-2xl font-bold text-pink-600" data-completed="heart-count">
+            <%= @room.heart_count %>
+          </div>
+          <div class="text-sm text-gray-600">送ったハート</div>
+        </div>
+        
+        <div class="bg-green-50 rounded-lg p-4">
+          <div class="text-2xl font-bold text-green-600" data-completed="ended-at">
+            <% if @room.ended_at %>
+              <%= @room.ended_at.strftime('%H:%M') %>
+            <% end %>
+          </div>
+          <div class="text-sm text-gray-600">終了時刻</div>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <% if current_user.paired? %>
+          <%= link_to '新しいルームを作成', new_room_path, 
+              class: 'inline-block px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium' %>
+        <% end %>
+        
+        <div>
+          <%= link_to 'ルーム一覧に戻る', rooms_path, 
+              class: 'inline-block px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium mx-2' %>
+          <%= link_to 'ダッシュボード', root_path, 
+              class: 'inline-block px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors font-medium mx-2' %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <% if @room.status != 'completed' %>
+    <div class="navigation mt-4 text-center">
+      <%= link_to 'ルーム一覧に戻る', rooms_path, 
+          class: 'inline-block px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors' %>
+      <% if @room.status == 'waiting' %>
+        <%= link_to '編集', edit_room_path(@room), 
+            class: 'inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors ml-2' %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
