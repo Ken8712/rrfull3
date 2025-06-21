@@ -200,3 +200,7 @@ SECRET_KEY_BASE=xxx
 DATABASE_PASSWORD=xxx
 REDIS_URL=redis://localhost:6379
 ```
+
+## メモリ
+
+- システムテストは環境依存でうまくいかないので実行しなくてもいいです
