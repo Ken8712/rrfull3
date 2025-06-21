@@ -16,11 +16,12 @@
     <div class="waiting-section">
       <h3>ルーム開始前</h3>
       <p>パートナーが参加するのを待っています...</p>
-      <button class="btn btn-success btn-lg" 
+      <button class="px-6 py-3 bg-green-500 text-white text-lg rounded hover:bg-green-600 transition-colors" 
               data-action="click->room#startRoom">ルームを開始</button>
     </div>
-  <% elsif @room.status == 'active' %>
-    <div class="active-section">
+  <% end %>
+  
+  <div class="active-section" style="<%= @room.status == 'active' ? 'display: block;' : 'display: none;' %>">
       <div class="timer-section text-center mb-4">
         <h2>経過時間</h2>
         <div class="timer-display">
@@ -28,13 +29,13 @@
         </div>
         <div class="timer-controls mt-3">
           <% if @room.timer_running? %>
-            <button class="btn btn-warning" 
+            <button class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors" 
                     data-action="click->room#pauseTimer">一時停止</button>
           <% else %>
-            <button class="btn btn-success" 
+            <button class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors" 
                     data-action="click->room#resumeTimer">再開</button>
           <% end %>
-          <button class="btn btn-danger" 
+          <button class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors" 
                   data-action="click->room#completeRoom">ルーム終了</button>
         </div>
       </div>
@@ -45,7 +46,7 @@
           <span data-room-target="heartCount" class="display-3"><%= @room.heart_count %></span>
           <span class="heart-icon">❤️</span>
         </div>
-        <button class="btn btn-pink btn-lg" 
+        <button class="px-6 py-3 bg-pink-500 text-white text-lg rounded hover:bg-pink-600 transition-colors" 
                 data-action="click->room#addHeart">ハートを送る</button>
       </div>
       
@@ -81,7 +82,7 @@
       </div>
       
       <div class="activity-section">
-        <button class="btn btn-info text-sm px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
+        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" 
                 data-action="click->room#updateActivity">アクティビティ更新</button>
         <p class="text-sm text-gray-500 mt-2">最終アクティビティ: 
           <span data-room-target="lastActivity">
@@ -89,8 +90,9 @@
           </span>
         </p>
       </div>
-    </div>
-  <% elsif @room.status == 'completed' %>
+  </div>
+  
+  <% if @room.status == 'completed' %>
     <div class="completed-section">
       <h3>ルーム完了</h3>
       <p>総経過時間: <%= @room.elapsed_time_formatted %></p>

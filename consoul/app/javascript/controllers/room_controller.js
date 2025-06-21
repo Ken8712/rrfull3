@@ -97,9 +97,11 @@ export default class extends Controller {
       if (currentStatus !== roomData.status) {
         this.statusTarget.textContent = roomData.status
         this.updateStatusBadge(roomData.status)
-        this.updateControlButtons(roomData)
       }
     }
+    
+    // コントロールボタンは常に更新（タイマー状態が変わるため）
+    this.updateControlButtons(roomData)
   }
 
   // クライアント側タイマー開始
@@ -171,8 +173,35 @@ export default class extends Controller {
 
   // コントロールボタン更新
   updateControlButtons(roomData) {
-    // 必要に応じてボタンの表示/非表示を切り替え
-    // （今回は簡略化のため省略、本格実装時に追加）
+    const timerControls = this.element.querySelector('.timer-controls')
+    if (!timerControls) return
+
+    // 新しいボタンのHTML生成
+    let buttonsHTML = ''
+    
+    if (roomData.status === 'active') {
+      if (roomData.timer_running) {
+        buttonsHTML = `<button class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors" data-action="click->room#pauseTimer">一時停止</button>`
+      } else {
+        buttonsHTML = `<button class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors" data-action="click->room#resumeTimer">再開</button>`
+      }
+      buttonsHTML += ` <button class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors" data-action="click->room#completeRoom">ルーム終了</button>`
+    }
+
+    // タイマーボタンのみを更新（ルーム終了ボタンは維持）
+    const existingTimerButton = timerControls.querySelector('[data-action*="pauseTimer"], [data-action*="resumeTimer"]')
+    const existingCompleteButton = timerControls.querySelector('[data-action*="completeRoom"]')
+    
+    if (roomData.status === 'active') {
+      // 既存のボタンがない、または異なる場合のみ更新
+      const needsUpdate = !existingTimerButton || 
+        (roomData.timer_running && !existingTimerButton.matches('[data-action*="pauseTimer"]')) ||
+        (!roomData.timer_running && !existingTimerButton.matches('[data-action*="resumeTimer"]'))
+      
+      if (needsUpdate) {
+        timerControls.innerHTML = buttonsHTML
+      }
+    }
   }
 
   // ルーム開始
@@ -184,8 +213,19 @@ export default class extends Controller {
       if (response.success) {
         this.updateUI(response.room)
         this.showNotification("ルームが開始されました")
-        // ページをリロードしてUIを更新
-        window.location.reload()
+        
+        // ステータス表示を強制的に更新
+        if (this.hasStatusTarget) {
+          this.statusTarget.textContent = 'active'
+          this.updateStatusBadge('active')
+        }
+        
+        // waiting-sectionを非表示にし、active-sectionを表示
+        const waitingSection = this.element.querySelector('.waiting-section')
+        const activeSection = this.element.querySelector('.active-section')
+        
+        if (waitingSection) waitingSection.style.display = 'none'
+        if (activeSection) activeSection.style.display = 'block'
       } else {
         this.showError(response.error)
       }

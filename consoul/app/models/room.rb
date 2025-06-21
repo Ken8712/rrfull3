@@ -53,11 +53,15 @@ class Room < ApplicationRecord
   def start!
     return false unless status == 'waiting'
     
-    update!(
-      status: 'active',
-      started_at: Time.current,
-      last_activity_at: Time.current
-    )
+    transaction do
+      update!(
+        status: 'active',
+        started_at: Time.current,
+        last_activity_at: Time.current,
+        timer_running: true,
+        timer_started_at: Time.current
+      )
+    end
   end
 
   # ルームを完了
