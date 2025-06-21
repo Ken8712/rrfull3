@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(bundle exec rubocop:*)"
+      "Bash(bundle exec rubocop:*)",
+      "Bash(ping:*)",
+      "Bash(nslookup:*)",
+      "Bash(dig:*)",
+      "Bash(ssh:*)"
     ],
     "deny": []
   }
