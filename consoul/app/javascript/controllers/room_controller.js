@@ -12,11 +12,15 @@ export default class extends Controller {
   connect() {
     console.log("Room controller connected for room:", this.roomIdValue)
     this.startPolling()
+    
+    // ページ可視性の変化を監視（バックグラウンド対策）
+    document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this))
   }
 
   disconnect() {
     this.stopPolling()
     this.stopClientTimer()
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange.bind(this))
   }
 
   // ポーリング開始
@@ -188,11 +192,11 @@ export default class extends Controller {
     
     if (roomData.status === 'active') {
       if (roomData.timer_running) {
-        buttonsHTML = `<button class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors" data-action="click->room#pauseTimer">一時停止</button>`
+        buttonsHTML = `<button class="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 active:bg-yellow-700 transition-colors touch-manipulation" data-action="click->room#pauseTimer">一時停止</button>`
       } else {
-        buttonsHTML = `<button class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors" data-action="click->room#resumeTimer">再開</button>`
+        buttonsHTML = `<button class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors touch-manipulation" data-action="click->room#resumeTimer">再開</button>`
       }
-      buttonsHTML += ` <button class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors" data-action="click->room#completeRoom">ルーム終了</button>`
+      buttonsHTML += ` <button class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 active:bg-red-700 transition-colors touch-manipulation" data-action="click->room#completeRoom">ルーム終了</button>`
     }
 
     // タイマーボタンのみを更新（ルーム終了ボタンは維持）
@@ -405,19 +409,53 @@ export default class extends Controller {
     }, 600)
   }
 
+  // バックグラウンド/フォアグラウンド切り替え処理
+  handleVisibilityChange() {
+    if (document.hidden) {
+      // バックグラウンドになった
+      console.log('App went to background')
+      // ポーリング間隔を長くする（バッテリー節約）
+      this.stopPolling()
+      this.pollingTimer = setInterval(() => {
+        this.fetchRoomStatus()
+      }, 5000) // 5秒間隔に
+    } else {
+      // フォアグラウンドに戻った
+      console.log('App came to foreground')
+      // 即座に最新状態を取得
+      this.fetchRoomStatus()
+      // 通常のポーリング間隔に戻す
+      this.stopPolling()
+      this.startPolling()
+    }
+  }
+
   // Room APIアクション送信
   async sendRoomAction(action) {
-    const response = await fetch(`/rooms/${this.roomIdValue}/${action}`, {
-      method: "PATCH",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
-        "X-Requested-With": "XMLHttpRequest"
-      }
-    })
+    try {
+      const response = await fetch(`/rooms/${this.roomIdValue}/${action}`, {
+        method: "PATCH",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
 
-    return await response.json()
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error('Network error:', error)
+      // ネットワークエラーの場合、リトライを示唆
+      if (error.message.includes('Failed to fetch')) {
+        this.showError("ネットワークエラー。接続を確認してください。")
+      }
+      throw error
+    }
   }
 
   // ハートボタンアニメーション

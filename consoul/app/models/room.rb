@@ -2,8 +2,8 @@ class Room < ApplicationRecord
   # =====================================
   # アソシエーション
   # =====================================
-  belongs_to :user1, class_name: 'User'
-  belongs_to :user2, class_name: 'User'
+  belongs_to :user1, class_name: "User"
+  belongs_to :user2, class_name: "User"
 
   # =====================================
   # バリデーション
@@ -20,12 +20,12 @@ class Room < ApplicationRecord
   # =====================================
   # スコープ
   # =====================================
-  scope :active, -> { where(status: 'active') }
-  scope :for_user, ->(user) { where('user1_id = ? OR user2_id = ?', user.id, user.id) }
+  scope :active, -> { where(status: "active") }
+  scope :for_user, ->(user) { where("user1_id = ? OR user2_id = ?", user.id, user.id) }
   scope :recent, -> { order(created_at: :desc) }
-  scope :stale, -> { 
-    where(status: 'active')
-    .where('last_activity_at < ?', 3.minutes.ago) 
+  scope :stale, -> {
+    where(status: "active")
+    .where("last_activity_at < ?", 3.minutes.ago)
   }
 
   # =====================================
@@ -34,7 +34,7 @@ class Room < ApplicationRecord
 
   # ルームの参加者を取得
   def participants
-    [user1, user2]
+    [ user1, user2 ]
   end
 
   # 指定されたユーザーがこのルームの参加者かどうか
@@ -51,11 +51,11 @@ class Room < ApplicationRecord
 
   # ルームを開始
   def start!
-    return false unless status == 'waiting'
-    
+    return false unless status == "waiting"
+
     transaction do
       update!(
-        status: 'active',
+        status: "active",
         started_at: Time.current,
         last_activity_at: Time.current,
         timer_running: true,
@@ -67,12 +67,12 @@ class Room < ApplicationRecord
   # ルームを完了
   def complete!
     return false unless %w[active paused].include?(status)
-    
+
     # タイマーが動いている場合は停止
     pause_timer! if timer_running?
-    
+
     update!(
-      status: 'completed',
+      status: "completed",
       ended_at: Time.current
     )
   end
@@ -81,14 +81,14 @@ class Room < ApplicationRecord
   def current_elapsed_seconds
     return timer_seconds unless timer_running?
     return timer_seconds unless timer_started_at
-    
+
     timer_seconds + (Time.current - timer_started_at).to_i
   end
 
   # タイマーを開始
   def start_timer!
     return false if timer_running?
-    
+
     update!(
       timer_running: true,
       timer_started_at: Time.current,
@@ -99,11 +99,11 @@ class Room < ApplicationRecord
   # タイマーを一時停止
   def pause_timer!
     return false unless timer_running?
-    
+
     transaction do
       current_time = Time.current
       elapsed = timer_seconds + (current_time - timer_started_at).to_i
-      
+
       update!(
         timer_seconds: elapsed,
         timer_running: false,
@@ -124,17 +124,17 @@ class Room < ApplicationRecord
     seconds = current_elapsed_seconds
     minutes = seconds / 60
     remaining_seconds = seconds % 60
-    format('%02d:%02d', minutes, remaining_seconds)
+    format("%02d:%02d", minutes, remaining_seconds)
   end
 
   # ルームがアクティブかどうか
   def active?
-    status == 'active'
+    status == "active"
   end
 
   # ルームが完了しているかどうか
   def completed?
-    status == 'completed'
+    status == "completed"
   end
 
   # ユーザーアクティビティを記録
@@ -166,11 +166,11 @@ class Room < ApplicationRecord
   # 利用可能な感情リスト
   def self.available_emotions
     {
-      '😊' => '嬉しい',
-      '😢' => '悲しい', 
-      '😠' => '怒っている',
-      '😴' => '眠い',
-      '🤔' => '考え中'
+      "😊" => "嬉しい",
+      "😢" => "悲しい",
+      "😠" => "怒っている",
+      "😴" => "眠い",
+      "🤔" => "考え中"
     }
   end
 
@@ -182,9 +182,9 @@ class Room < ApplicationRecord
 
   # 非アクティブなルームを自動完了
   def auto_complete_if_stale!
-    if status == 'active' && stale?
+    if status == "active" && stale?
       update!(
-        status: 'completed',
+        status: "completed",
         ended_at: Time.current
       )
       true
@@ -205,7 +205,7 @@ class Room < ApplicationRecord
   # user1とuser2がペアになっていることを確認
   def users_must_be_paired
     return unless user1&.persisted? && user2&.persisted?
-    
+
     unless user1.partner == user2
       errors.add(:base, "ルームを作成できるのはペアになっているユーザーのみです")
     end

@@ -5,7 +5,7 @@ RSpec.describe Room, type: :model do
   let(:user1) { User.create!(email: 'user1@example.com', name: 'User1', password: 'password123') }
   let(:user2) { User.create!(email: 'user2@example.com', name: 'User2', password: 'password123') }
   let(:user3) { User.create!(email: 'user3@example.com', name: 'User3', password: 'password123') }
-  
+
   before do
     # user1とuser2をペアにする
     user1.create_mutual_pair_with(user2)

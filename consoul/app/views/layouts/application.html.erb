@@ -32,6 +32,29 @@
       }
     </script>
     
+    <!-- iOS最適化 -->
+    <style>
+      /* タップハイライト無効化 */
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      /* タッチ操作の最適化 */
+      .touch-manipulation {
+        touch-action: manipulation;
+      }
+      
+      /* ボタンのダブルタップズーム無効化 */
+      button {
+        touch-action: manipulation;
+      }
+      
+      /* スクロールの最適化 */
+      body {
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
+    
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>

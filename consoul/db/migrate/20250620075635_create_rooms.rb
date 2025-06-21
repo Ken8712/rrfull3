@@ -15,9 +15,9 @@ class CreateRooms < ActiveRecord::Migration[7.2]
 
       t.timestamps
     end
-    
+
     add_index :rooms, :status
-    add_index :rooms, [:user1_id, :user2_id]
+    add_index :rooms, [ :user1_id, :user2_id ]
     add_index :rooms, :created_at
     add_index :rooms, :last_activity_at
   end

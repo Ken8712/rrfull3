@@ -7,12 +7,12 @@ class User < ApplicationRecord
   # =====================================
   # アソシエーション
   # =====================================
-  belongs_to :pair_user, class_name: 'User', optional: true
-  has_one :paired_with, class_name: 'User', foreign_key: :pair_user_id
-  
+  belongs_to :pair_user, class_name: "User", optional: true
+  has_one :paired_with, class_name: "User", foreign_key: :pair_user_id
+
   # Room関連
-  has_many :rooms_as_user1, class_name: 'Room', foreign_key: :user1_id, dependent: :destroy
-  has_many :rooms_as_user2, class_name: 'Room', foreign_key: :user2_id, dependent: :destroy
+  has_many :rooms_as_user1, class_name: "Room", foreign_key: :user1_id, dependent: :destroy
+  has_many :rooms_as_user2, class_name: "Room", foreign_key: :user2_id, dependent: :destroy
 
   # =====================================
   # バリデーション
@@ -61,16 +61,16 @@ class User < ApplicationRecord
   rescue ActiveRecord::RecordInvalid
     false
   end
-  
+
   # 自分が参加しているルームを取得
   def rooms
     Room.for_user(self)
   end
-  
+
   # パートナーとの新しいルームを作成
   def create_room_with_partner(title)
     return nil unless paired?
-    
+
     partner_user = partner
     Room.create(
       title: title,

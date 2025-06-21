@@ -1,9 +1,9 @@
 Rails.application.routes.draw do
   devise_for :users
-  
+
   # ダッシュボードをルートに設定
-  root 'dashboards#index'
-  
+  root "dashboards#index"
+
   # ルーム関連
   resources :rooms do
     member do
