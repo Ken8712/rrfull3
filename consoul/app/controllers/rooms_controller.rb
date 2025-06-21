@@ -1,8 +1,8 @@
 class RoomsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_room, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_room, only: [ :show, :edit, :update, :destroy, :start, :pause_timer, :resume_timer, :complete, :add_heart, :update_activity, :set_emotion, :status ]
   before_action :ensure_paired, only: [ :new, :create ]
-  before_action :ensure_participant, only: [ :show, :edit, :update, :destroy ]
+  before_action :ensure_participant, only: [ :show, :edit, :update, :destroy, :start, :pause_timer, :resume_timer, :complete, :add_heart, :update_activity, :set_emotion, :status ]
 
   def index
     @rooms = current_user.rooms.recent
