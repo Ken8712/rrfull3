@@ -92,22 +92,64 @@
       </div>
   </div>
   
-  <% if @room.status == 'completed' %>
-    <div class="completed-section">
-      <h3>ルーム完了</h3>
-      <p>総経過時間: <%= @room.elapsed_time_formatted %></p>
-      <p>総ハート数: <%= @room.heart_count %></p>
-      <% if @room.ended_at %>
-        <p>終了時刻: <%= @room.ended_at.strftime('%Y/%m/%d %H:%M') %></p>
+  <div class="completed-section" style="<%= @room.status == 'completed' ? 'display: block;' : 'display: none;' %>">
+    <div class="bg-white rounded-lg shadow p-8 text-center">
+      <div class="mb-6">
+        <div class="text-6xl mb-4">🎉</div>
+        <h3 class="text-3xl font-bold text-gray-900 mb-2">ルーム完了</h3>
+        <p class="text-gray-600">お疲れ様でした！</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-blue-50 rounded-lg p-4">
+          <div class="text-2xl font-bold text-blue-600" data-completed="elapsed-time">
+            <%= @room.elapsed_time_formatted %>
+          </div>
+          <div class="text-sm text-gray-600">総経過時間</div>
+        </div>
+        
+        <div class="bg-pink-50 rounded-lg p-4">
+          <div class="text-2xl font-bold text-pink-600" data-completed="heart-count">
+            <%= @room.heart_count %>
+          </div>
+          <div class="text-sm text-gray-600">送ったハート</div>
+        </div>
+        
+        <div class="bg-green-50 rounded-lg p-4">
+          <div class="text-2xl font-bold text-green-600" data-completed="ended-at">
+            <% if @room.ended_at %>
+              <%= @room.ended_at.strftime('%H:%M') %>
+            <% end %>
+          </div>
+          <div class="text-sm text-gray-600">終了時刻</div>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <% if current_user.paired? %>
+          <%= link_to '新しいルームを作成', new_room_path, 
+              class: 'inline-block px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium' %>
+        <% end %>
+        
+        <div>
+          <%= link_to 'ルーム一覧に戻る', rooms_path, 
+              class: 'inline-block px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium mx-2' %>
+          <%= link_to 'ダッシュボード', root_path, 
+              class: 'inline-block px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors font-medium mx-2' %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <% if @room.status != 'completed' %>
+    <div class="navigation mt-4 text-center">
+      <%= link_to 'ルーム一覧に戻る', rooms_path, 
+          class: 'inline-block px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors' %>
+      <% if @room.status == 'waiting' %>
+        <%= link_to '編集', edit_room_path(@room), 
+            class: 'inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors ml-2' %>
       <% end %>
     </div>
   <% end %>
-  
-  <div class="navigation mt-4">
-    <%= link_to 'ルーム一覧に戻る', rooms_path, class: 'btn btn-outline-primary' %>
-    <% if @room.status == 'waiting' %>
-      <%= link_to '編集', edit_room_path(@room), class: 'btn btn-secondary' %>
-    <% end %>
-  </div>
 </div>
 

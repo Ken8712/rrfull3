@@ -7,6 +7,8 @@ export default class extends Controller {
     pollingInterval: { type: Number, default: 500 }
   }
 
+  completedHandled = false
+
   connect() {
     console.log("Room controller connected for room:", this.roomIdValue)
     this.startPolling()
@@ -102,6 +104,11 @@ export default class extends Controller {
     
     // コントロールボタンは常に更新（タイマー状態が変わるため）
     this.updateControlButtons(roomData)
+    
+    // ルーム完了を検知
+    if (roomData.status === 'completed' && !this.completedHandled) {
+      this.handleRoomCompleted(roomData)
+    }
   }
 
   // クライアント側タイマー開始
@@ -273,14 +280,59 @@ export default class extends Controller {
       if (response.success) {
         this.updateUI(response.room)
         this.showNotification("ルームが終了されました")
-        this.stopPolling()
-        // ページをリロードしてUIを更新
-        window.location.reload()
+        // handleRoomCompletedで処理されるため、ここでは何もしない
       } else {
         this.showError(response.error)
       }
     } catch (error) {
       this.showError("ルーム終了に失敗しました")
+    }
+  }
+
+  // ルーム完了時の処理
+  handleRoomCompleted(roomData) {
+    this.completedHandled = true
+    this.stopPolling()
+    this.stopClientTimer()
+    
+    // セクションの切り替え
+    const waitingSection = this.element.querySelector('.waiting-section')
+    const activeSection = this.element.querySelector('.active-section')
+    const completedSection = this.element.querySelector('.completed-section')
+    
+    if (waitingSection) waitingSection.style.display = 'none'
+    if (activeSection) activeSection.style.display = 'none'
+    if (completedSection) {
+      completedSection.style.display = 'block'
+      
+      // 完了データを更新
+      this.updateCompletedSection(roomData)
+    }
+    
+    this.showNotification('ルームが終了しました')
+  }
+
+  // 完了セクションの内容更新
+  updateCompletedSection(roomData) {
+    const completedSection = this.element.querySelector('.completed-section')
+    if (!completedSection) return
+
+    // 総経過時間
+    const elapsedTimeEl = completedSection.querySelector('[data-completed="elapsed-time"]')
+    if (elapsedTimeEl) {
+      elapsedTimeEl.textContent = roomData.elapsed_time
+    }
+
+    // 総ハート数
+    const heartCountEl = completedSection.querySelector('[data-completed="heart-count"]')
+    if (heartCountEl) {
+      heartCountEl.textContent = roomData.heart_count
+    }
+
+    // 終了時刻
+    const endedAtEl = completedSection.querySelector('[data-completed="ended-at"]')
+    if (endedAtEl && roomData.ended_at) {
+      endedAtEl.textContent = roomData.ended_at
     }
   }
 
